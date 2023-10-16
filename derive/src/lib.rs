@@ -157,7 +157,6 @@ fn open_enum_impl(
                     // print.
                     if derive.is_ident("Debug") && !allow_alias {
                         make_custom_debug_impl = true;
-                        include_in_struct = false;
                     }
                 }
             }
