@@ -82,8 +82,8 @@ fn emit_debug_impl<'a>(
     ident: &Ident,
     variants: impl Iterator<Item = &'a Ident> + Clone,
 ) -> TokenStream {
-    quote!(impl ::core::fmt::Debug for #ident {
-        fn fmt(&self, fmt: &mut ::core::fmt::Formatter) -> ::core::fmt::Result {
+    quote!(impl ::std::fmt::Debug for #ident {
+        fn fmt(&self, fmt: &mut ::core::fmt::Formatter) -> ::std::fmt::Result {
             #![allow(unreachable_patterns)]
             let s = match *self {
                 #( Self::#variants => stringify!(#variants), )*
@@ -146,20 +146,17 @@ fn open_enum_impl(
                 let derives =
                     attr.parse_args_with(Punctuated::<Path, Token![,]>::parse_terminated)?;
                 for derive in derives {
-                    if derive.is_ident("PartialEq") {
-                        our_derives.remove("PartialEq");
-                    } else if derive.is_ident("Eq") {
-                        our_derives.remove("Eq");
-                    }
+                    our_derives.insert(derive.ident);
 
                     // If we allow aliasing, then don't bother with a custom
                     // debug impl. There's no way to tell which alias we should
                     // print.
                     if derive.is_ident("Debug") && !allow_alias {
                         make_custom_debug_impl = true;
-                        include_in_struct = false;
+                        our_derives.remove("Debug");
                     }
                 }
+                include_in_struct = false;
             }
             // Copy linting attribute to the impl.
             "allow" | "warn" | "deny" | "forbid" => impl_attrs.push(attr.to_token_stream()),
@@ -212,6 +209,7 @@ fn open_enum_impl(
     let syn::ItemEnum { ident, vis, .. } = enum_;
 
     let debug_impl = if make_custom_debug_impl {
+        println!("Coming here");
         emit_debug_impl(&ident, variants.iter().map(|(i, _, _, _)| *i))
     } else {
         TokenStream::default()
@@ -233,6 +231,7 @@ fn open_enum_impl(
             )
         });
 
+    println!("{:?}", struct_attrs);
     Ok(quote! {
         #(#struct_attrs)*
         #vis struct #ident(#repr_visibility #inner_repr);
