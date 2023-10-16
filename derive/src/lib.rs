@@ -138,8 +138,9 @@ fn open_enum_impl(
     our_derives.insert("PartialEq");
     our_derives.insert("Eq");
     let mut make_custom_debug_impl = false;
+    let mut include_in_struct = true;
     for attr in &enum_.attrs {
-        let mut include_in_struct = true;
+        include_in_struct = true;
         // Turns out `is_ident` does a `to_string` every time
         match attr.path.to_token_stream().to_string().as_str() {
             "derive" => {
