@@ -157,7 +157,7 @@ fn open_enum_impl(
                     // print.
                     if derive.is_ident("Debug") && !allow_alias {
                         make_custom_debug_impl = true;
-                        include_in_struct = false;
+                        // include_in_struct = false;
                     }
                 }
             }
@@ -216,6 +216,8 @@ fn open_enum_impl(
     } else {
         TokenStream::default()
     };
+
+    println!("{:?}", struct_attrs);
 
     let fields = variants
         .into_iter()
